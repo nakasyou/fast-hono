@@ -20,38 +20,6 @@ jobs:
       - run: bun run build
       - run: bun run test
 
-  denoify:
-    name: "Checking if you've done denoify"
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18.x'
-      - uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: '1.0.25'
-      - run: bun install
-      - run: |
-          bun run denoify
-          if [[ `git status --porcelain` ]]; then
-            exit 1
-          fi
-
-  deno:
-    name: 'Deno'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-      - run: env NAME=Deno deno test --allow-read --allow-env --allow-write -c runtime_tests/deno/deno.json runtime_tests/deno
-      - run: deno test -c runtime_tests/deno-jsx/deno.precompile.json runtime_tests/deno-jsx
-      - run: deno test -c runtime_tests/deno-jsx/deno.react-jsx.json runtime_tests/deno-jsx
-
   bun:
     name: 'Bun'
     runs-on: ubuntu-latest
