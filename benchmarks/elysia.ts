@@ -2,7 +2,8 @@ import { Elysia } from 'elysia'
 import { defineFramework } from './framework'
 
 export default await defineFramework(async () => {
-  const app = new Elysia()
+  const app = new Elysia({
+  })
     .get('/', async () => {
       return {
         data: 0

@@ -1,6 +1,7 @@
 import * as z from 'zod'
 
 import elysia from './elysia'
+import fastHono from './fast-hono'
 import type { Fetch } from './framework'
 import hono from './hono'
 
@@ -8,6 +9,7 @@ import hono from './hono'
 const workers: Record<string, Fetch> = {
   elysia: elysia,
   hono: hono,
+  fastHono: fastHono
 }
 
 const createFetch = (fetch: Fetch, fetched?: () => void) => async ({ method, data, url }: {
