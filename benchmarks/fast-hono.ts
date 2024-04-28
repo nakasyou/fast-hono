@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { Hono } from '../src/index'
 import { RegExpRouter } from '../src/router/reg-exp-router/index'
 import { defineFramework } from './framework'
 

@@ -1,58 +1,73 @@
 import * as z from 'zod'
 
+import elysia from './elysia'
+import fastHono from './fast-hono'
+import type { Fetch } from './framework'
+import hono from './hono'
+
 // ベンチマーク
-const workers: Record<string, string> = {
-  elysia: './elysia.ts',
-  hono: './hono.ts',
+const workers: Record<string, Fetch> = {
+  elysia: elysia,
+  hono: hono,
+  fastHono: fastHono
 }
 
-const createFetchToJson = () => ({
-  n: 0,
-  time: 0,
-  async fetchToJson ({ method, data, url, vali }: {
-    method?: string
-    data?: unknown
-    url: string
-    vali: (data: unknown) => void | boolean
-  }) {
-    this.n += 1
-    const started = performance.now()
-    const res = await fetch(`http://localhost:1234${url}`, {
-      method,
-      body: data ? JSON.stringify(data) : null
-    }).then(res => res.text())
-    const ended = performance.now()
+const createFetch = (fetch: Fetch, fetched?: () => void) => async ({ method, data, url }: {
+  method?: string
+  data?: unknown
+  url: string
+}): Promise<{
+  json: unknown
+}> => {
+  const request = new Request(`http://localhost${url}`, {
+    method,
+    body: data ? JSON.stringify(data) : null
+  })
+  const res = await fetch(request)
+  const json = await res.json()
 
-    if (vali(JSON.parse(res)) === false) {
-      throw new Error(`Error in ${method ?? 'GET'} ${url}`)
-    }
-
-    this.time += ended - started
-  },
-  get result (): number {
-    return this.time / this.n
+  fetched?.()
+  return {
+    json
   }
-})
+}
+const testServer = async ({ url, method, data, vali, fetch }: {
+  url: string
+  method?: string
+  data?: unknown
+  vali: (data: unknown) => void | boolean
+  fetch: ReturnType<typeof createFetch>
+}) => {
+  const { json } = await fetch({
+    method,
+    data,
+    url
+  })
+  if (vali(json) === false) {
+    throw new Error(`Error in ${method ?? 'GET'} ${url}`)
+  }
+}
+const test = async (fetchFun: Fetch) => {
+  const fetch = createFetch(fetchFun)
 
-const bench = async () => {
-  const c = createFetchToJson()
-
-  await c.fetchToJson({
+  await testServer({
     url: '/',
     vali(data) {
       z.object({ data: z.literal(0) }).parse(data)
     },
+    fetch
   })
 
   const name = Math.random().toString()
-  await c.fetchToJson({
+  await testServer({
     url: `/user/${name}`,
     vali (data) {
       z.object({ name: z.literal(name) }).parse(data)
-    }
+    },
+    fetch
   })
 
-  await c.fetchToJson({
+  await testServer({
     url: '/json',
     method: 'POST',
     data: {
@@ -61,44 +76,46 @@ const bench = async () => {
     vali(data) {
       z.object({ hello: z.literal('world') }).parse(data)
     },
+    fetch
   })
-
-  return c.result
 }
 
-for (const [name, workerPath] of Object.entries(workers)) {
+
+const bench = async (fetchFn: Fetch, timeout: number) => {
+  const started = performance.now()
+  let reqested = 0
+  const fetch = createFetch(fetchFn, () => {
+    reqested += 1
+  })
+  
+  while (performance.now() - started < timeout) {
+    await fetch({
+      url: '/'
+    })
+    await fetch({
+      url: `/user/${Math.random().toString()}`
+    })
+    await fetch({
+      url: '/json',
+      method: 'POST',
+      data: {
+        hello: 'world'
+      }
+    })
+  }
+
+  const reqPeerSec = reqested / ((performance.now() - started) / 1000)
+  return reqPeerSec
+}
+for (const [name, fetch] of Object.entries(workers)) {
   console.log(name)
 
-  const worker = new Worker(new URL(workerPath, import.meta.url))
-  worker.onerror = (evt) => {
-    console.error(evt)
-  }
-  let startedTime: number
-  let initedTime: number
-  const endPromise = new Promise((resolve) => worker.onmessage = async (evt) => {
-    if (evt.data === 'inited') {
-      initedTime = performance.now()
-      console.log('Init:', initedTime - startedTime, 'ms')
-    }
-    if (evt.data === 'started') {
-      const n = 1000
-      let time = 0
-      for (let i = 0; i !== n; i++) {
-        time += await bench()
-      }
-      console.log(`${1000 / (time / n)}req/s`)
-      worker.postMessage('stop')
-    }
-    if (evt.data === 'stopped') {
-      worker.terminate()
-      resolve(null)
-    }
-  })
-  await Bun.sleep(100)
-  worker.postMessage('start')
-  startedTime = performance.now()
-  await endPromise
-  console.log()
+  await test(fetch)
+  console.log(`✅ bypassed test: ${name}`)
+
+  const reqBySec = await bench(fetch, 1000)
+
+  console.log(`${name}: ${reqBySec} req/s`)
 }
 
 export { }
