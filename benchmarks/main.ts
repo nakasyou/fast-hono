@@ -81,7 +81,7 @@ for (const [name, workerPath] of Object.entries(workers)) {
       console.log('Init:', initedTime - startedTime, 'ms')
     }
     if (evt.data === 'started') {
-      const n = 2
+      const n = 1000
       let time = 0
       for (let i = 0; i !== n; i++) {
         time += await bench()
