@@ -1,7 +1,7 @@
-import { defineFramework } from './framework'
 import { Elysia } from 'elysia'
+import { defineFramework } from './framework'
 
-defineFramework(async () => {
+export default await defineFramework(async () => {
   const app = new Elysia()
     .get('/', async () => {
       return {
@@ -17,10 +17,6 @@ defineFramework(async () => {
       type: 'json'
     })
 
-  return () => {
-    const server = app.listen(1234)
-    return () => {
-      server.stop()
-    }
-  }
+  app.compile()
+  return app.fetch
 })

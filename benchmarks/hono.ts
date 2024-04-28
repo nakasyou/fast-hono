@@ -1,8 +1,8 @@
-import { defineFramework } from './framework'
 import { Hono } from '../src/index'
 import { RegExpRouter } from '../src/router/reg-exp-router/index'
+import { defineFramework } from './framework'
 
-defineFramework(async () => {
+export default await defineFramework(async () => {
   const app = new Hono({
     router: new RegExpRouter()
   })
@@ -16,13 +16,5 @@ defineFramework(async () => {
     }))
     .post('/json', async c => c.json(await c.req.json()))
 
-  return () => {
-    const server = Bun.serve({
-      fetch: app.fetch,
-      port: 1234
-    })
-    return () => {
-      server.stop()
-    }
-  }
+  return app.fetch
 })
