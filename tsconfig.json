@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ESNext",
     "declaration": true,
     "moduleResolution": "Bundler",
     "outDir": "./dist",
@@ -17,12 +17,15 @@
     "jsx": "react",
     "jsxFactory": "jsx",
     "jsxFragmentFactory": "Fragment",
+    "lib": ["ESNext"],
+    "module": "ESNext"
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.mts",
     "src/**/*.test.ts",
-    "src/**/*.test.tsx"
+    "src/**/*.test.tsx",
+    "benchmarks/**/*.ts"
   ],
 }
