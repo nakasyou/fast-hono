@@ -7,9 +7,9 @@ import hono from './hono'
 
 // ベンチマーク
 const workers: Record<string, Fetch> = {
+  fastHono: fastHono,
   elysia: elysia,
   hono: hono,
-  fastHono: fastHono
 }
 
 const createFetch = (fetch: Fetch, fetched?: () => void) => async ({ method, data, url }: {
@@ -107,6 +107,7 @@ const bench = async (fetchFn: Fetch, timeout: number) => {
   const reqPeerSec = reqested / ((performance.now() - started) / 1000)
   return reqPeerSec
 }
+let fastHonoSpeed: number = 0
 for (const [name, fetch] of Object.entries(workers)) {
   console.log(name)
 
@@ -115,7 +116,11 @@ for (const [name, fetch] of Object.entries(workers)) {
 
   const reqBySec = await bench(fetch, 1000)
 
-  console.log(`${name}: ${reqBySec} req/s`)
+  if (name === 'fastHono') {
+    fastHonoSpeed = reqBySec
+  }
+  const ratio = fastHonoSpeed / reqBySec
+  console.log(`${name}: ${reqBySec} req/s (${ratio * 100}%)`)
 }
 
 export { }
