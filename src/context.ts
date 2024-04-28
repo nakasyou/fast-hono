@@ -216,7 +216,7 @@ export class Context<
   render: Renderer = (...args) => this.renderer(...args)
 
   setLayout = (layout: Layout<PropsForRenderer & { Layout: Layout }>) => (this.layout = layout)
-  getLayout = () => this.layout
+  getLayout() { return this.layout }
 
   /**
    * `.setRenderer()` can set the layout in the custom middleware.
@@ -237,7 +237,7 @@ export class Context<
    * ```
    * @see https://hono.dev/api/context#render-setrenderer
    */
-  setRenderer = (renderer: Renderer) => {
+  setRenderer (renderer: Renderer) {
     this.renderer = renderer
   }
 
@@ -255,7 +255,7 @@ export class Context<
    * ```
    * @see https://hono.dev/api/context#body
    */
-  header = (name: string, value: string | undefined, options?: { append?: boolean }): void => {
+  header (name: string, value: string | undefined, options?: { append?: boolean }): void {
     // Clear the header
     if (value === undefined) {
       if (this.#headers) {
@@ -347,11 +347,11 @@ export class Context<
     return { ...this._var } as never
   }
 
-  newResponse: NewResponse = (
+  newResponse (
     data: Data | null,
     arg?: StatusCode | ResponseInit,
     headers?: HeaderRecord
-  ): Response => {
+  ): Response {
     // Optimized
     if (this.#isFresh && !headers && !arg && this.#status === 200) {
       return new Response(data, {
@@ -384,8 +384,9 @@ export class Context<
       this.#res.headers.forEach((v, k) => {
         if (k === 'set-cookie' && this.#res) {
           const cookies = this.#res.headers.getSetCookie()
-          for (const cookie of cookies) {
-            this.#headers?.append('set-cookie', cookie)
+          const cookiesLength = cookies.length
+          for (let cookieI = 0; cookieI < cookiesLength; cookieI++) {
+            this.#headers?.append('set-cookie', cookies[cookieI])
           }
           return
         }
@@ -395,7 +396,8 @@ export class Context<
     }
 
     headers ??= {}
-    for (const [k, v] of Object.entries(headers)) {
+    for (const k in headers) {
+      const v = headers[k]
       if (typeof v === 'string') {
         this.#headers.set(k, v)
       } else {
@@ -431,11 +433,11 @@ export class Context<
    * ```
    * @see https://hono.dev/api/context#body
    */
-  body: BodyRespond = (
+  body (
     data: Data | null,
     arg?: StatusCode | ResponseInit,
     headers?: HeaderRecord
-  ): Response => {
+  ): Response {
     return typeof arg === 'number'
       ? this.newResponse(data, arg, headers)
       : this.newResponse(data, arg)
@@ -451,11 +453,11 @@ export class Context<
    * ```
    * @see https://hono.dev/api/context#text
    */
-  text: TextRespond = (
+  text (
     text: string,
     arg?: StatusCode | ResponseInit,
     headers?: HeaderRecord
-  ): Response => {
+  ): Response {
     // If the header is empty, return Response immediately.
     // Content-Type will be added automatically as `text/plain`.
     if (!this.#preparedHeaders) {
@@ -480,7 +482,7 @@ export class Context<
    * ```
    * @see https://hono.dev/api/context#json
    */
-  json: JSONRespond = <T>(
+  json<T>(
     object: InterfaceToType<T> extends JSONValue ? T : JSONValue,
     arg?: StatusCode | ResponseInit,
     headers?: HeaderRecord
@@ -491,7 +493,7 @@ export class Context<
           ? never
           : JSONParsed<T>
         : never
-    > => {
+    > {
     const body = JSON.stringify(object)
     this.#preparedHeaders ??= {}
     this.#preparedHeaders['content-type'] = 'application/json; charset=UTF-8'
