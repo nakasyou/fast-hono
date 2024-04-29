@@ -218,7 +218,9 @@ export class Context<
    */
   render: Renderer = (...args) => this.renderer(...args)
 
-  setLayout = (layout: Layout<PropsForRenderer & { Layout: Layout }>) => (this.layout = layout)
+  setLayout (layout: Layout<PropsForRenderer & { Layout: Layout }>) {
+    this.layout = layout
+  }
   getLayout() { return this.layout }
 
   /**
@@ -297,7 +299,7 @@ export class Context<
     }
   }
 
-  status = (status: StatusCode): void => {
+  status (status: StatusCode): void  {
     this.#isFresh = false
     this.#status = status
   }
@@ -506,11 +508,11 @@ export class Context<
     ) as any
   }
 
-  html: HTMLRespond = (
+  html (
     html: string | Promise<string>,
     arg?: StatusCode | ResponseInit,
     headers?: HeaderRecord
-  ): Response | Promise<Response> => {
+  ): Response | Promise<Response> {
     this.#preparedHeaders ??= {}
     this.#preparedHeaders['content-type'] = 'text/html; charset=UTF-8'
 
@@ -547,7 +549,7 @@ export class Context<
    * ```
    * @see https://hono.dev/api/context#redirect
    */
-  redirect = (location: string, status: RedirectStatusCode = 302): Response => {
+  redirect (location: string, status: RedirectStatusCode = 302): Response {
     this.#headers ??= new Headers()
     this.#headers.set('Location', location)
     return this.newResponse(null, status)
@@ -563,7 +565,7 @@ export class Context<
    * ```
    * @see https://hono.dev/api/context#notfound
    */
-  notFound = (): Response | Promise<Response> => {
+  notFound (): Response | Promise<Response> {
     return this.notFoundHandler(this)
   }
 }

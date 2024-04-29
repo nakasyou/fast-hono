@@ -191,7 +191,7 @@ export class HonoRequest<P extends string = '/', I extends Input['out'] = {}> {
     return parsedBody
   }
 
-  private cachedBody = (key: keyof Body) => {
+  private cachedBody (key: keyof Body) {
     const { bodyCache, raw } = this
     const cachedBody = bodyCache[key]
 
@@ -328,7 +328,12 @@ export class HonoRequest<P extends string = '/', I extends Input['out'] = {}> {
    * @see https://hono.dev/api/request#matchedroutes
    */
   get matchedRoutes(): RouterRoute[] {
-    return this.#matchResult[0].map(([[, route]]) => route)
+    const result: RouterRoute[] = []
+    const matchResultLength = this.#matchResult[0].length
+    for (let i = 0; i < matchResultLength; i++) {
+      result.push(this.#matchResult[0][i][0][1])
+    }
+    return result
   }
 
   /**
