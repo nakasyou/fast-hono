@@ -25,7 +25,6 @@
     "src/**/*.d.ts",
     "src/**/*.mts",
     "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    "benchmarks/**/*.ts"
+    "src/**/*.test.tsx"
   ],
 }

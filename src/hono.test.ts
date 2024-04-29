@@ -388,13 +388,13 @@ describe('strict parameter', () => {
 describe('Destruct functions in context', () => {
   it('Should return 200 response - text', async () => {
     const app = new Hono()
-    app.get('/text', ({ text }) => text('foo'))
+    app.get('/text', (c) => c.text('foo'))
     const res = await app.request('http://localhost/text')
     expect(res.status).toBe(200)
   })
   it('Should return 200 response - json', async () => {
     const app = new Hono()
-    app.get('/json', ({ json }) => json({ foo: 'bar' }))
+    app.get('/json', (c) => c.json({ foo: 'bar' }))
     const res = await app.request('http://localhost/json')
     expect(res.status).toBe(200)
   })

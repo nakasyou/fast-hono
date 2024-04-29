@@ -139,12 +139,13 @@ export class RegExpRouter<T> implements Router<T> {
     }
 
     if (!middleware[method]) {
-      ;[middleware, routes].forEach((handlerMap) => {
+      for (let i = 0; i !== 2; i++) {
+        const handlerMap = i === 0 ? middleware : routes
         handlerMap[method] = Object.create(null)
-        Object.keys(handlerMap[METHOD_NAME_ALL]).forEach((p) => {
+        for (const p in handlerMap[METHOD_NAME_ALL]) {
           handlerMap[method][p] = [...handlerMap[METHOD_NAME_ALL][p]]
-        })
-      })
+        }
+      }
     }
 
     if (path === '/*') {
@@ -232,9 +233,12 @@ export class RegExpRouter<T> implements Router<T> {
   private buildAllMatchers(): Record<string, Matcher<T> | null> {
     const matchers: Record<string, Matcher<T> | null> = Object.create(null)
 
-    ;[...Object.keys(this.routes!), ...Object.keys(this.middleware!)].forEach((method) => {
+    for (const method in this.routes!) {
       matchers[method] ||= this.buildMatcher(method)
-    })
+    }
+    for (const method in this.middleware!) {
+      matchers[method] ||= this.buildMatcher(method)
+    }
 
     // Release cache
     this.middleware = this.routes = undefined
@@ -247,22 +251,21 @@ export class RegExpRouter<T> implements Router<T> {
 
     let hasOwnRoute = method === METHOD_NAME_ALL
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ;[this.middleware!, this.routes!].forEach((r) => {
-      const ownRoute = r[method]
-        ? Object.keys(r[method]).map((path) => [path, r[method][path]])
-        : []
+    for (let i = 0; i !== 2; i++) {
+      const r = i === 0 ? this.middleware! : this.routes!
+      const ownRoute = []
+      for (const path in r[method] ?? {}) {
+        ownRoute.push([path, r[method][path]])
+      }
       if (ownRoute.length !== 0) {
         hasOwnRoute ||= true
         routes.push(...(ownRoute as [string, HandlerWithMetadata<T>[]][]))
       } else if (method !== METHOD_NAME_ALL) {
-        routes.push(
-          ...(Object.keys(r[METHOD_NAME_ALL]).map((path) => [path, r[METHOD_NAME_ALL][path]]) as [
-            string,
-            HandlerWithMetadata<T>[]
-          ][])
-        )
+        for (const path in r[METHOD_NAME_ALL]) {
+          routes.push([path, r[METHOD_NAME_ALL][path]] as [string,HandlerWithMetadata<T>[]])
+        }
       }
-    })
+    }
 
     if (!hasOwnRoute) {
       return null

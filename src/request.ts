@@ -200,7 +200,7 @@ export class HonoRequest<P extends string = '/', I extends Input['out'] = {}> {
     }
 
     if (!bodyCache[key]) {
-      for (const keyOfBodyCache of Object.keys(bodyCache)) {
+      for (const keyOfBodyCache in bodyCache) {
         if (keyOfBodyCache === 'parsedBody') {
           continue
         }
@@ -210,7 +210,7 @@ export class HonoRequest<P extends string = '/', I extends Input['out'] = {}> {
           if (keyOfBodyCache === 'json') {
             body = JSON.stringify(body)
           }
-          return await new Response(body)[key]()
+          return await (raw.bodyUsed ? new Response(body) : raw)[key]()
         })()
       }
     }

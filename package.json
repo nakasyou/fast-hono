@@ -32,7 +32,8 @@
     "prerelease": "bun denoify && bun test:deno && bun run build",
     "release": "np",
     "bench": "bun run benchmarks/main.ts",
-    "bench:dev": "bun run --watch benchmarks/main.ts"
+    "bench:dev": "bun run --watch benchmarks/main.ts",
+    "test:core": "vitest --run"
   },
   "exports": {
     ".": {

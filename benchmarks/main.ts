@@ -114,7 +114,7 @@ for (const [name, fetch] of Object.entries(workers)) {
   await test(fetch)
   console.log(`✅ bypassed test: ${name}`)
 
-  const reqBySec = await bench(fetch, 1000)
+  const reqBySec = await bench(fetch, 1500)
 
   if (name === 'fastHono') {
     fastHonoSpeed = reqBySec

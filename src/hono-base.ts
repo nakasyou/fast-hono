@@ -133,12 +133,13 @@ class Hono<
       if (!method) {
         return this
       }
+      const handlerLength = handlers.length
       for (const p of [path].flat()) {
         this.#path = p
         for (const m of [method].flat()) {
-          handlers.map((handler) => {
-            this.addRoute(m.toUpperCase(), this.#path, handler)
-          })
+          for (let handlerI = 0; handlerI < handlerLength; handlerI++) {
+            this.addRoute(m.toUpperCase(), this.#path, handlers[handlerI])
+          }
         }
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

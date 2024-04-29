@@ -15,6 +15,6 @@ export default await defineFramework(async () => {
       name: c.req.param('name')
     }))
     .post('/json', async c => c.json(await c.req.json()))
-
+  await app.request('/')
   return app.fetch
 })

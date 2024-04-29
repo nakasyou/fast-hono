@@ -88,7 +88,9 @@ type ContextOptions<E extends Env> = {
 export const TEXT_PLAIN = 'text/plain; charset=UTF-8'
 
 const setHeaders = (headers: Headers, map: Record<string, string> = {}) => {
-  Object.entries(map).forEach(([key, value]) => headers.set(key, value))
+  for (const key in map) {
+    headers.set(key, map[key])
+  }
   return headers
 }
 
@@ -191,8 +193,9 @@ export class Context<
         if (k === 'set-cookie') {
           const cookies = this.#res.headers.getSetCookie()
           _res.headers.delete('set-cookie')
-          for (const cookie of cookies) {
-            _res.headers.append('set-cookie', cookie)
+          const cookiesLength = cookies.length
+          for (let cookieI = 0; cookieI < cookiesLength; cookieI++) {
+            _res.headers.append('set-cookie', cookies[cookieI])
           }
         } else {
           _res.headers.set(k, v)
