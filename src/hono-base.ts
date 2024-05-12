@@ -2,6 +2,7 @@ import { compose } from './compose'
 import { Context } from './context'
 import type { ExecutionContext } from './context'
 import { HTTPException } from './http-exception'
+import { Matcher } from './match'
 import { HonoRequest } from './request'
 import type { Router } from './router'
 import { METHOD_NAME_ALL, METHOD_NAME_ALL_LOWERCASE, METHODS } from './router'
@@ -308,12 +309,24 @@ class Hono<
     throw err
   }
 
+  #matcher?: Matcher
+  /**
+   * Build Hono App
+   */
+  build() {
+    const matcher = new Matcher()
+  }
+
   private dispatch(
     request: Request,
     executionCtx: ExecutionContext | FetchEventLike | undefined,
     env: E['Bindings'],
     method: string
   ): Response | Promise<Response> {
+    if (!this.#matcher) {
+      throw new Error('Hono is not built')
+    }
+
     // Handle HEAD method
     if (method === 'HEAD') {
       return (async () =>

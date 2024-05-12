@@ -1,0 +1,28 @@
+{
+  "path": {
+    "type": "static",
+    "text": ""
+  },
+  "children": [
+    {
+      "path": {
+        "type": "static",
+        "text": "/a"
+      },
+      "handlers": [
+        0
+      ],
+      "children": []
+    },
+    {
+      "path": {
+        "type": "static",
+        "text": "/ab"
+      },
+      "handlers": [
+        1
+      ],
+      "children": []
+    }
+  ]
+}

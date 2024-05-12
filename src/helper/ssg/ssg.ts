@@ -202,7 +202,7 @@ export const fetchRoutesContent = function* <
   }
 }
 
-const isDynamicRoute = (path: string): boolean => {
+export const isDynamicRoute = (path: string): boolean => {
   return path.split('/').some((segment) => segment.startsWith(':') || segment.includes('*'))
 }
 
